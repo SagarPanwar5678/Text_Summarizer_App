@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Summarizer | AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #7c3aed;
+        --primary-dark: #6d28d9;
+        --primary-light: #ede9fe;
+        --text: #1e1b2e;
+        --muted: #77758a;
+        --border: #e6e3ef;
+        --white: #ffffff;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        min-height: 100vh;
+        padding: 50px 20px;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 10% 10%, #ede9fe 0, transparent 32%),
+          radial-gradient(circle at 90% 90%, #e0e7ff 0, transparent 32%),
+          #f8f7fc;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 38px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(230, 227, 239, 0.9);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(54, 35, 91, 0.09);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        margin-bottom: 18px;
+        color: white;
+        font-size: 28px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+      }
+
+      h1 {
+        font-size: clamp(28px, 5vw, 36px);
+        font-weight: 800;
+        letter-spacing: -1.3px;
+        margin-bottom: 10px;
+      }
+
+      h1 span {
+        color: var(--primary);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .badge {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 7px 12px;
+        border-radius: 30px;
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .section-label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      textarea {
+        display: block;
+        width: 100%;
+        min-height: 210px;
+        resize: vertical;
+        padding: 18px;
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        outline: none;
+        background: #fcfbff;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.8;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      textarea::placeholder {
+        color: #aaa6ba;
+      }
+
+      textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        background: white;
+      }
+
+      .input-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin: 10px 2px 22px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      button {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+        color: white;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(124, 58, 237, 0.2);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s,
+          opacity 0.2s;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(124, 58, 237, 0.28);
+      }
+
+      button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
+      #summary-output {
+        display: none;
+        margin-top: 30px;
+        padding: 24px;
+        border: 1px solid #e4dcff;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #faf8ff, #f5f3ff);
+        animation: fadeIn 0.35s ease;
+      }
+
+      #summary-output.visible {
+        display: block;
+      }
+
+      .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .summary-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        background: var(--primary-light);
+        font-size: 20px;
+      }
+
+      #summary-heading {
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      .summary-caption {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      #summary-text {
+        color: #49445c;
+        font-size: 14px;
+        line-height: 1.9;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .footer {
+        margin-top: 28px;
+        text-align: center;
+        color: #9995aa;
+        font-size: 12px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 24px 14px;
+        }
+
+        .container {
+          padding: 25px 19px;
+          border-radius: 20px;
+        }
+
+        .header {
+          margin-bottom: 26px;
+        }
+
+        textarea {
+          min-height: 180px;
+        }
+
+        #summary-output {
+          padding: 19px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <div class="logo" aria-hidden="true">✦</div>
+        <h1>Text <span>Summarizer</span></h1>
+        <p class="subtitle">
+          Turn long conversations into clear, concise summaries.
+          <br />Simple, fast, and powered by AI.
+        </p>
+        <div class="badge">AI-POWERED · HUGGING FACE TRANSFORMER</div>
+      </header>
+
+      <form id="summarization-form">
+        <label class="section-label" for="dialogue-input">
+          Enter your conversation
+        </label>
+
+        <textarea
+          id="dialogue-input"
+          placeholder="Paste your conversation or text here..."
+          required
+        ></textarea>
+
+        <div class="input-footer">
+          <span>Your text stays in the input box</span>
+          <span id="char-count">0 characters</span>
+        </div>
+
+        <button type="submit" id="summarize-button">
+          <span aria-hidden="true">✦</span>
+          <span id="button-text">Generate Summary</span>
+        </button>
+      </form>
+
+      <section id="summary-output" aria-live="polite">
+        <div class="summary-header">
+          <div class="summary-icon" aria-hidden="true">✧</div>
+          <div>
+            <h2 id="summary-heading">Your Summary</h2>
+            <p class="summary-caption">AI-generated condensed content</p>
+          </div>
+        </div>
+        <p id="summary-text"></p>
+      </section>
+
+      <footer class="footer">
+        Built with Python & Hugging Face Transformers
+      </footer>
+    </main>
+
+    <script>
+      const form = document.getElementById("summarization-form");
+      const dialogueInput = document.getElementById("dialogue-input");
+      const summaryOutput = document.getElementById("summary-output");
+      const summaryText = document.getElementById("summary-text");
+      const submitButton = document.getElementById("summarize-button");
+      const buttonText = document.getElementById("button-text");
+      const charCount = document.getElementById("char-count");
+
+      dialogueInput.addEventListener("input", () => {
+        charCount.textContent = `${dialogueInput.value.length} characters`;
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const dialogue = dialogueInput.value.trim();
+        if (!dialogue) return;
+
+        summaryOutput.classList.add("visible");
+        summaryText.textContent = "Generating your summary... Please wait.";
+        submitButton.disabled = true;
+        buttonText.textContent = "Summarizing...";
+
+        try {
+          const response = await fetch("/summarize/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ dialogue }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          summaryText.textContent = data.summary || "No summary returned.";
+        } catch (err) {
+          summaryText.textContent = `Something went wrong: ${err.message}`;
+        } finally {
+          submitButton.disabled = false;
+          buttonText.textContent = "Generate Summary";
+        }
+      });
+    </script>
+  </body>
+</html>
